@@ -1,6 +1,8 @@
 #modified to fit sparc data
 #the datasheet should be prepped ahead of time to have descriptive labels and only the texts
-#improvements could be made on the labels so that they are more descriptive of the texts
+##format the datasheet so that there column1 is the label and colum2 is response text
+
+#improvements could be made to this script so that labels are more descriptive of the texts
 
 
 
