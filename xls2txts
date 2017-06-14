@@ -1,0 +1,90 @@
+#modified to fit sparc data
+#the datasheet should be prepped ahead of time to have descriptive labels and only the texts
+#improvements could be made on the labels so that they are more descriptive of the texts
+
+
+
+#' Making many text files from a single Excel file
+#'
+#' Convert a single Excel file (one text per row) into
+#' separate text files. A function in R. Requires Java Runtime 
+#' Environment (JRE), version 6.0 or higher
+#'
+#' To use this function for the first time run:
+#' install.packages("devtools")
+#' then thereafter you just need to load the function
+#' fom github like so:
+#' library(devtools) # windows users need Rtools installed, mac users need XCode installed
+#' source_url("https://gist.github.com/benmarwick/9278490/raw/xls2txts.R")
+#'
+#' Here's how to set the arguments to the function
+#'
+#' mydir is the full path of the folder that contains your Excel file
+#' for example "C:/Downloads/myxlsfile" Note that it must have
+#' quote marks around it and forward slashes, which are not default
+#' in windows. This should be a folder with a *single* Excel file in it.
+#' The file can be xls or xlsx. Note that this function doesn't
+#' work if your Excel file is in use - close the file before running this.  
+#'
+#' sheet is the name of the sheet in the Excel file that your data is
+#' in. The sheet name should be given with quote marks around it
+#' like this "Sheet 1" Note that this function will combine text in
+#' all the columns (from column 2 onwards, we assume column 1 is a 
+#' document name) into one long character string. If your sheet has a 
+#' comlicated structure you may want to use the XLconnect package directly
+#' in R, it's very flexible. 
+#' 
+#' labels refers to the column number with the document labels. The 
+#' default is the first column, but in can your want to use a different
+#' column you can set it like so (for example if col 2 has the labels):
+#' labels = 2
+#' 
+#' header refers to the first row. If the first row of your EXcel file
+#' does not contain column headings then you should add
+#' header = FALSE
+#' into the function. If you do have column headers you don't need to
+#' add anything, the default is header = TRUE
+#'
+#'
+#' A full example, assuming you've sourced the
+#' function from github already:
+#' xls2txt("C:/Downloads/myxlsfile", "Sheet 1", labels = 2)
+#' and after a moment you'll get a message in the R console
+#' saying 'Your texts files can be found in C:/Downloads/myxlsfile'
+
+install.packages("devtools")
+library(devtools)
+
+install.packages("XLConnect")
+library(XLConnect)
+#read in data from worksheet and store in a variable called 'df'
+df <- readWorksheetFromFile("/Users/gharp/Code/SPARC_data_analysis/stm/datafiles/txt4convers/sparc_texts.xlsx", sheet = 1)
+
+  
+# allocate lots of memory to Java
+options( java.parameters = "-Xmx4g" )
+  
+# free memory
+xlcFreeMemory()
+  
+# combine all except the first column together into one long character string for each row
+# mytxtsconcat <- apply(df[-(1:labels)], 1, paste, collapse=" ")
+
+#convert text data into characters instead of factors (optional)  
+df$interview_response_body <- as.character(df$interview_response_body)
+  
+# make a dataframe 'mytextsdf' with the file names and texts
+mytxtsdf <- data.frame(filename = df[,"UniqID"], # get the first col for the text file names
+                         fulltext = "interview_response_body")
+{  
+# Now write one text file for each row of the csv
+# use 'invisible' so we don't see anything in the console
+  
+setwd("/Users/gharp/Code/SPARC_data_analysis/stm/datafiles/txt4convers/texts")
+message("Writing text files into your folder, this may take a few moments...")
+
+invisible(lapply(2:nrow(df), function(i) write.table(df[i,2],file = paste0(df[i,1], ".txt"), row.names = FALSE, col.names = FALSE, quote = FALSE)))
+  
+message("Done writing text files into your folder")
+
+}
